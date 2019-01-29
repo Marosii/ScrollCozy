@@ -1,0 +1,40 @@
+document.getElementsByClassName("page_block_header_extra _header_extra")[0].remove()
+
+function getScroll(arg, num) {
+     var x = "<style>#navbar {display: flex; justify-content: space-evenly;} #navbar strong {display: inline-block; padding: 0 5px;} .ui_crumb strong:hover {color: red;} #activeButton {background-color: black; color: white;} .ui_crumb {text-align: center;} #navbar .hid {display: none;} </style><strong onclick=checkNavbarAndShowFaves(document.getElementById('navbar').firstChild) style='float: left'>«</strong><strong onclick=checkNavbarAndShowFaves(document.getElementById('navbar').lastChild) style='float: right'>»</strong><span  id='navbar'>";
+     for (i=0; i<=num; i++) {
+          if (i>12) {x = x + "<strong onclick='checkNavbarAndShowFaves(this)' class='hid'> " + (i+1).toString() + " </strong>"}
+          else {x = x + "<strong onclick='checkNavbarAndShowFaves(this)'> " + (i+1).toString() + " </strong>"}};
+     arg.innerHTML = x + "</span>"};
+
+function getEnd(e) {document.getElementsByClassName("ui_crumb")[0].innerText="Идёт загрузка, подождите…"; ajax.post("al_fave.php",{act:"load",section:cur.section,offset:e,part:1},{onDone:function(i){if(i){getEnd(e+20)};if(!i){var res=((e-20)/20);console.log(e);console.log(res);getScroll(document.getElementsByClassName("ui_crumb")[0], res);}},cache:1})};
+
+getEnd(0);
+
+function checkNavbarAndShowFaves(elem) {
+var num = Number(elem.innerText) - 1;
+     if (document.getElementById("activeButton") != undefined) {
+          document.getElementById("activeButton").removeAttribute("id")}
+     elem.setAttribute("id", "activeButton");
+     if (document.getElementById("navbar").childNodes.length > 13) {
+     for (i=0; i<document.getElementById("navbar").childNodes.length; i++) {
+          document.getElementById("navbar").childNodes[i].setAttribute("class", "hid");
+     }
+     for (i=0; i<7; i++) {
+          if (document.getElementById("navbar").childNodes[num+i] !== undefined) {
+               document.getElementById("navbar").childNodes[num+i].removeAttribute("class")}
+          else {document.getElementById("navbar").childNodes[num+i-13].removeAttribute("class")}
+          if (document.getElementById("navbar").childNodes[num-i] !== undefined) {
+               document.getElementById("navbar").childNodes[num-i].removeAttribute("class")}
+          else {document.getElementById("navbar").childNodes[i+6].removeAttribute("class")}
+     }
+     }
+     showFaves(num*20);
+}
+
+lockButton(document.getElementById("show_more_likes_posts"));
+
+showFaves=function(e) {ajax.post("al_fave.php",{act:"load",section:cur.section,offset:e,part:1},{onDone:function(i){if(i){document.getElementById("results").innerHTML=i}},cache:1})};
+cur.disableAutoMore=true;
+
+window.addEventListener("keydown", function(e) {if (e.keyCode == 37) {checkNavbarAndShowFaves(document.getElementById("activeButton").previousSibling)} else if (e.keyCode == 39) {checkNavbarAndShowFaves(document.getElementById("activeButton").nextSibling)}})
